@@ -1,6 +1,4 @@
 import bcrypt from "bcrypt";
-import e from "cors";
-import { request } from "express";
 import { signInSchema, userSchema } from "../models/users.model.js";
 import { uniqueEmailValidation } from "../repository/users.repositories.js";
 

@@ -12,8 +12,7 @@ export async function signUp(req, res) {
     return res.sendStatus(201);
   } catch (err) {
     return res.status(500).send(err.message);
-  }
-  
+  } 
 }
 
 export async function signIn(req, res) {
