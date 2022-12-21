@@ -1,5 +1,5 @@
 import { linkSchema } from "../models/links.model.js";
-import { findToken } from "../repository/links.repositories.js";
+import { findOwner, findToken, findUrls } from "../repository/links.repositories.js";
 
 
 export async function urlValidation(req, res, next) {
@@ -29,5 +29,32 @@ export async function urlValidation(req, res, next) {
 
     res.locals = data;
   
+    next();
+  }
+
+  export async function urlOwnerValidation(req, res, next) {
+    const {id} = req.params;
+    const { authorization } = req.headers;
+    const token = authorization?.replace('Bearer ', '');
+
+    if(!token) return res.status(401).send("token inválido");
+
+
+    const url = await findUrls(id)
+
+    if(url.rowCount < 1){
+      return res.sendStatus(404)
+    }
+
+    const urlOwner = await findOwner(token, id);
+
+    console.log(urlOwner.rows)
+            
+    if (urlOwner.rowCount < 1) {
+        return res.sendStatus(401)
+    }
+
+    res.locals = id;
+
     next();
   }

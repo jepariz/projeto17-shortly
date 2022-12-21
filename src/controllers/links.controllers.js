@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid'
-import { addVisitCount, createShortenUrl, findShortUrls, findUrls } from '../repository/links.repositories.js';
+import { addVisitCount, createShortenUrl, deleteUrlFromDb, findShortUrls, findUrls } from '../repository/links.repositories.js';
 
 export async function shortenUrl(req, res) {
     const {url, userId} = res.locals;
@@ -51,6 +51,18 @@ export async function shortenUrl(req, res) {
       } else{
         return res.sendStatus(404)
       }
+    } catch (err) {
+      return res.status(500).send(err.message);
+    } 
+  }
+
+  export async function deleteUrl(req, res) {
+
+    const id = res.locals
+  
+    try {
+      await deleteUrlFromDb(id)
+      return res.sendStatus(204)
     } catch (err) {
       return res.status(500).send(err.message);
     } 

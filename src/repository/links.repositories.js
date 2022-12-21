@@ -23,3 +23,11 @@ export function findShortUrls(shortUrl){
 export function addVisitCount(id){
   return connection.query('UPDATE links SET "visitCount"= ("visitCount" + 1) WHERE id=$1', [id]);
 }
+
+export function findOwner(token, id){
+  return connection.query('SELECT * FROM links INNER JOIN sessions ON links."userId" = sessions."userId" WHERE sessions.token =$1 AND links.id=$2', [token, id]);
+}
+
+export function deleteUrlFromDb(id){
+  return connection.query('DELETE FROM links WHERE id=$1', [id]);
+}
