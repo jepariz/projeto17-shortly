@@ -12,3 +12,8 @@ export function insertUser(name, email, hashPassword){
       );
 }
 
+export function findUser(email, password){
+  return connection.query(
+    "SELECT * FROM users WHERE email=$1 AND password=$2", [email, password] 
+    );
+}
