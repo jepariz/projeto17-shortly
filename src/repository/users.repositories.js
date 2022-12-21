@@ -17,3 +17,11 @@ export function findUser(email, password){
     "SELECT * FROM users WHERE email=$1 AND password=$2", [email, password] 
     );
 }
+
+export function createSession(name, token, id){
+  return connection.query(
+    `INSERT INTO sessions (name, token, "userId") 
+    VALUES ($1, $2, $3);`,
+    [name, token, id]
+  );
+}

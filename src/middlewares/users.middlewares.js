@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import e from "cors";
 import { request } from "express";
 import { signInSchema, userSchema } from "../models/users.model.js";
 import { uniqueEmailValidation } from "../repository/users.repositories.js";
@@ -28,6 +29,7 @@ export async function userValidation(req, res, next) {
 
   export async function signInValidation(req, res, next) {
     const { email, password } = req.body;
+    let login;
   
     const { error } = signInSchema.validate(req.body, { abortEarly: false });
   
@@ -47,8 +49,17 @@ export async function userValidation(req, res, next) {
     if (!passwordOk) {
       return res.sendStatus(401);
     }
+
+    if(emailExists.rowCount > 0 && passwordOk){
+      login = {
+        email: email,
+        password: passwordOk,
+        name: emailExists.rows[0].name,
+        id: emailExists.rows[0].id
+      }
+    }
   
-    res.locals = req.body;
+    res.locals = login;
   
     next();
   }
