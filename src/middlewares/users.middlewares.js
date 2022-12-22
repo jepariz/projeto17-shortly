@@ -1,6 +1,10 @@
 import bcrypt from "bcrypt";
+import jwt from 'jsonwebtoken';
+import dotenv from "dotenv";
 import { signInSchema, userSchema } from "../models/users.model.js";
-import { uniqueEmailValidation } from "../repository/users.repositories.js";
+import { uniqueEmailValidation, userExistsValidation } from "../repository/users.repositories.js";
+
+dotenv.config();
 
 export async function userValidation(req, res, next) {
     const {name, email, password, confirmPassword} = req.body;
@@ -59,5 +63,31 @@ export async function userValidation(req, res, next) {
   
     res.locals = login;
   
+    next();
+  }
+
+  export async function headerValidation(req, res, next) {
+    const { authorization } = req.headers;
+    const token = authorization?.replace('Bearer ', '');
+    const secret = process.env.SECRET
+
+    if(!token) return res.status(401).send("token inválido");
+
+    const decoded = jwt.verify(token, secret);
+            
+    if (!decoded) {
+        return res.sendStatus(401);
+    }
+
+    const userId = decoded.userId
+
+    const userExists = userExistsValidation(userId)
+
+    if(userExists.rowCount < 1){
+      return res.sendStatus(404)
+    }
+
+    res.locals = userId;
+
     next();
   }

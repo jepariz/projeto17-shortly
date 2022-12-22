@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
 import dotenv from "dotenv";
-import { findUser, insertUser } from "../repository/users.repositories.js";
+import { findUser, getLinks, getTotalVisitedSum, insertUser, userExistsValidation } from "../repository/users.repositories.js";
 
 dotenv.config();
 
@@ -36,5 +36,34 @@ export async function signIn(req, res) {
   }
 }
 
+export async function getUserLinks(req, res) {
+
+  const userId = res.locals
+
+  try {
+    const totalVisited = await getTotalVisitedSum()
+    const visitedSum = totalVisited.rows[0].totalVisited
+
+    const links = await getLinks(userId)
+
+    const linksData = links.rows
+
+    const response = {
+      id: linksData[0].id,
+      name: linksData[0].name,
+      visitCount: visitedSum,
+      shortenedUrls: linksData.map((row) => ({
+        id: row.linkId,
+        shortUrl: row.shortUrl,
+        url: row.url,
+        visitCount: row.visitCount,
+      })),
+    };
+
+    return res.status(200).send(response);
+  } catch (err) {
+    return res.status(500).send(err.message);
+  }
+}
 
 
