@@ -41,8 +41,8 @@ export async function getUserLinks(req, res) {
   const userId = res.locals
 
   try {
-    const totalVisited = await getTotalVisitedSum()
-    const visitedSum = totalVisited.rows[0].totalVisited
+    const totalVisited = await getTotalVisitedSum(userId)
+    const visitedSum = totalVisited.rows
 
     const links = await getLinks(userId)
 
@@ -51,7 +51,7 @@ export async function getUserLinks(req, res) {
     const response = {
       id: linksData[0].id,
       name: linksData[0].name,
-      visitCount: visitedSum,
+      visitCount: visitedSum[0].visitCount,
       shortenedUrls: linksData.map((row) => ({
         id: row.linkId,
         shortUrl: row.shortUrl,

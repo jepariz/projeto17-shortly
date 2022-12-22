@@ -32,7 +32,7 @@ export function getLinks(userId){
     );
 }
 
-export function getTotalVisitedSum(){
-  return connection.query('SELECT SUM(l."visitCount") AS "totalVisited" FROM links l'
+export function getTotalVisitedSum(userId){
+  return connection.query('SELECT SUM(l."visitCount") AS "visitCount" FROM links l JOIN users u ON l."userId" = u.id WHERE l."userId"=$1', [userId]
   )
 }

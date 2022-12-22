@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { linkSchema } from "../models/links.model.js";
 import { findUrls } from "../repository/links.repositories.js";
@@ -6,62 +6,63 @@ import { findUrls } from "../repository/links.repositories.js";
 dotenv.config();
 
 export async function urlValidation(req, res, next) {
-    const {url} = req.body;
-    const { authorization } = req.headers;
-    const token = authorization?.replace('Bearer ', '');
-    const secret = process.env.SECRET
+  const { url } = req.body;
+  const { authorization } = req.headers;
+  const token = authorization?.replace("Bearer ", "");
+  const secret = process.env.SECRET;
 
-    if(!token) return res.sendStatus(401);
+  let data;
 
-    const { error } = linkSchema.validate({url}, { abortEarly: false });
-  
+  try {
+    if (!token) return res.sendStatus(401);
+
+    const { error } = linkSchema.validate({ url }, { abortEarly: false });
+
     if (error) {
       const errors = error.details.map((detail) => detail.message);
       return res.status(422).send(errors);
     }
 
     const decoded = jwt.verify(token, secret);
-            
-    if (!decoded) {
-        return res.sendStatus(401);
-    }
 
-    const data = {
+    data = {
       url: url,
-      userId: decoded.userId
-    }
-
-    res.locals = data;
-  
-    next();
+      userId: decoded.userId,
+    };
+  } catch (error) {
+    return res.sendStatus(401);
   }
 
-  export async function urlOwnerValidation(req, res, next) {
-    const {id} = req.params;
-    const { authorization } = req.headers;
-    const token = authorization?.replace('Bearer ', '');
-    const secret = process.env.SECRET
+  res.locals = data;
 
-    if(!token) return res.status(401).send("token inválido");
+  next();
+}
 
+export async function urlOwnerValidation(req, res, next) {
+  const { id } = req.params;
+  const { authorization } = req.headers;
+  const token = authorization?.replace("Bearer ", "");
+  const secret = process.env.SECRET;
 
-    const url = await findUrls(id)
-
-    if(url.rowCount < 1){
-      return res.sendStatus(404)
-    }
+  try {
+    const url = await findUrls(id);
 
     const decoded = jwt.verify(token, secret);
-            
-    if (!decoded) {
-        return res.sendStatus(401);
+
+    if (!token) return res.status(401).send("token inválido");
+
+    if (url.rowCount < 1) {
+      return res.sendStatus(404);
     }
 
-    if(url.rows[0].userId !== decoded.userId){
-      return res.sendStatus(401)
+    if (url.rows[0].userId !== decoded.userId) {
+      return res.sendStatus(401);
     }
-
-    res.locals = id;
-
-    next();
+  } catch (error) {
+    return res.status(401).send({ message: "Token inválido" });
   }
+
+  res.locals = id;
+
+  next();
+}

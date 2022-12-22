@@ -21,7 +21,7 @@ export async function userValidation(req, res, next) {
     const emailExists = await uniqueEmailValidation(email)
 
     if(emailExists.rowCount > 0){
-      return res.status(409).send("Email já cadastrado!")
+      return res.sendStatus(409)
     }
   
     res.locals = user;
