@@ -11,8 +11,8 @@ export async function ranking(req, res) {
       const response = rankingData.map((row) => ({
         id: row.id,
         name: row.name,
-        linksCount: row.linksCount,
-        visitCount: row.visitCount === null ? "0" : row.visitCount
+        linksCount: row.linksCount ,
+        visitCount: row.visitCount  
       }))
   
       return res.status(200).send(response);
