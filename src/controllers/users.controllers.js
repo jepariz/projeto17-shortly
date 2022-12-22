@@ -1,7 +1,9 @@
 import bcrypt from "bcrypt";
-import { v4 as uuid } from "uuid";
-import { createSession, findUser, insertUser } from "../repository/users.repositories.js";
+import jwt from 'jsonwebtoken';
+import dotenv from "dotenv";
+import { findUser, insertUser } from "../repository/users.repositories.js";
 
+dotenv.config();
 
 export async function signUp(req, res) {
   const { name, email, password} = res.locals;
@@ -17,12 +19,18 @@ export async function signUp(req, res) {
 
 export async function signIn(req, res) {
   const {email, password, name, id} = res.locals;
-  const token = uuid();
+  const secret = process.env.SECRET
+
+  const payload = {
+    username: name,
+    userId: id
+  }
+
+  const jwtToken = jwt.sign(payload, secret)
 
   try {
     await findUser(email, password)
-    await createSession(name, token, id)
-    return res.status(201).send(token);
+    return res.status(201).send(jwtToken);
   } catch (err) {
     return res.status(500).send(err.message);
   }

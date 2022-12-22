@@ -18,10 +18,3 @@ export function findUser(email, password){
     );
 }
 
-export function createSession(name, token, id){
-  return connection.query(
-    `INSERT INTO sessions (name, token, "userId") 
-    VALUES ($1, $2, $3);`,
-    [name, token, id]
-  );
-}

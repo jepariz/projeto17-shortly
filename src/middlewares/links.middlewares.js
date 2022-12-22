@@ -1,11 +1,15 @@
+import jwt from 'jsonwebtoken';
+import dotenv from "dotenv";
 import { linkSchema } from "../models/links.model.js";
-import { findOwner, findToken, findUrls } from "../repository/links.repositories.js";
+import { findUrls } from "../repository/links.repositories.js";
 
+dotenv.config();
 
 export async function urlValidation(req, res, next) {
     const {url} = req.body;
     const { authorization } = req.headers;
     const token = authorization?.replace('Bearer ', '');
+    const secret = process.env.SECRET
 
     if(!token) return res.sendStatus(401);
 
@@ -16,15 +20,15 @@ export async function urlValidation(req, res, next) {
       return res.status(422).send(errors);
     }
 
-    const session = await findToken(token);
+    const decoded = jwt.verify(token, secret);
             
-    if (session.rowCount < 1) {
+    if (!decoded) {
         return res.sendStatus(401);
     }
 
     const data = {
       url: url,
-      userId: session.rows[0].userId
+      userId: decoded.userId
     }
 
     res.locals = data;
@@ -36,6 +40,7 @@ export async function urlValidation(req, res, next) {
     const {id} = req.params;
     const { authorization } = req.headers;
     const token = authorization?.replace('Bearer ', '');
+    const secret = process.env.SECRET
 
     if(!token) return res.status(401).send("token inválido");
 
@@ -46,12 +51,14 @@ export async function urlValidation(req, res, next) {
       return res.sendStatus(404)
     }
 
-    const urlOwner = await findOwner(token, id);
-
-    console.log(urlOwner.rows)
+    const decoded = jwt.verify(token, secret);
             
-    if (urlOwner.rowCount < 1) {
-        return res.sendStatus(401)
+    if (!decoded) {
+        return res.sendStatus(401);
+    }
+
+    if(url.rows[0].userId !== decoded.userId){
+      return res.sendStatus(401)
     }
 
     res.locals = id;
